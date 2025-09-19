@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<body>
+<p id="location-display">Click the button to get your address.</p>
+<button onclick="getAddress()">Get Address</button>
+<script>
+    const apiKey = '9b28a3129ceb4f9da7125883e45ef50d'; // Replace with your actual API key
+
+    function getAddress() {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    console.log(`Latitude: ${lat}, Longitude: ${lon}`);
+                    
+                    fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=${apiKey}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.features && data.features.length > 0) {
+                                const formattedAddress = data.features[0].properties.formatted;
+                                document.getElementById("location-display").innerText = formattedAddress;
+                            } else {
+                                document.getElementById("location-display").innerText = "Address not found.";
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching address:', error);
+                            document.getElementById("location-display").innerText = "Error getting address.";
+                        });
+                },
+                (error) => {
+                    document.getElementById("location-display").innerText = "Error getting location: " + error.message;
+                }
+            );
+        } else {
+            document.getElementById("location-display").innerText = "Geolocation is not supported by this browser.";
+        }
+    }
+</script>
+</body>
+</html>
